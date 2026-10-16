@@ -7,9 +7,17 @@ import { SimulationFanMotif } from "@/components/layout/intro-motifs";
 import { Badge } from "@/components/ui/badge";
 import { ButtonAnchor } from "@/components/ui/button";
 import { PlaceholderNote } from "@/components/ui/placeholder-note";
-import { Em, SectionHeader } from "@/components/ui/section-header";
+import { SectionHeader } from "@/components/ui/section-header";
+import { ItemList } from "@/components/ui/item-list";
 import { getPageLocale } from "@/lib/locale";
-import { formatEdition, formatEditionShort, getFund, getSite, intlLocale, tr } from "@/lib/content";
+import {
+  formatEditionInline,
+  formatEditionShort,
+  getFund,
+  getSite,
+  intlLocale,
+  tr,
+} from "@/lib/content";
 import { pageAlternates } from "@/lib/seo";
 import { Disclaimer } from "./_components/disclaimer";
 import { MonthlyBars } from "./_components/monthly-bars";
@@ -50,7 +58,7 @@ export default async function CapitalPage() {
     range:
       bars.length > 1 ? `${bars[0].label}–${bars[bars.length - 1].label}` : (bars[0]?.label ?? ""),
   });
-  const asOf = formatEdition(fund.cumulativeAsOf, locale);
+  const asOf = formatEditionInline(fund.cumulativeAsOf, locale);
   const summary = bars.map((b) => `${b.label} ${b.valueLabel}`).join(", ");
   const disclaimerItems = [
     t("disclaimer.simulated"),
@@ -65,7 +73,7 @@ export default async function CapitalPage() {
       <PageIntro
         motif={<SimulationFanMotif />}
         eyebrow={t("eyebrow")}
-        title={t.rich("title", { em: (c) => <Em>{c}</Em> })}
+        title={t.rich("title", { em: (c) => c })}
         description={t("description")}
       >
         <Badge variant="highlight">{tCommon("simulated")}</Badge>
@@ -76,12 +84,10 @@ export default async function CapitalPage() {
       </section>
 
       <section className="container-page section-y">
-        <SectionHeader eyebrow={t("results.eyebrow")} title={t("results.title")} />
+        <SectionHeader title={t("results.title")} />
         <div className="mt-12 grid gap-6 lg:grid-cols-5">
-          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-2">
-            <p className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
-              {t("results.cumulative")}
-            </p>
+          <div className="rounded-2xl bg-card p-6 sm:p-8 lg:col-span-2">
+            <p className="text-sm text-muted-foreground">{t("results.cumulative")}</p>
             <p className="mt-4">
               <NumberTicker
                 value={fund.cumulativeReturn}
@@ -98,11 +104,9 @@ export default async function CapitalPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-3">
+          <div className="rounded-2xl bg-card p-6 sm:p-8 lg:col-span-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
-                {t("results.monthly")}
-              </h3>
+              <h3 className="text-sm text-muted-foreground">{t("results.monthly")}</h3>
               <Badge variant="highlight">{tCommon("simulated")}</Badge>
             </div>
             <div className="mt-6">
@@ -118,10 +122,8 @@ export default async function CapitalPage() {
           </div>
         </div>
         {fund.methodology ? (
-          <div className="mt-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
-            <h3 className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
-              {t("results.methodologyTitle")}
-            </h3>
+          <div className="mt-6 rounded-2xl bg-card p-6 sm:p-8">
+            <h3 className="text-sm text-muted-foreground">{t("results.methodologyTitle")}</h3>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">
               {tr(fund.methodology, locale)}
             </p>
@@ -136,28 +138,24 @@ export default async function CapitalPage() {
       <section className="border-t border-border">
         <div className="container-page section-y">
           <SectionHeader
-            eyebrow={t("how.eyebrow")}
             title={t.rich("how.title", { em: (c) => c })}
             description={t("how.description")}
           />
-          <ul className="mt-12 grid gap-4 md:grid-cols-3">
-            {purposes.map((key, i) => (
-              <li key={key} className="rounded-2xl border border-border bg-card p-6">
-                <span className="font-mono text-xs text-highlight">0{i + 1}</span>
-                <h3 className="mt-3 font-sans text-xl font-semibold tracking-tight">
-                  {t(`how.items.${key}.title`)}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">{t(`how.items.${key}.body`)}</p>
-              </li>
-            ))}
-          </ul>
+          <ItemList
+            className="mt-12"
+            items={purposes.map((key, i) => ({
+              key,
+              marker: i + 1,
+              title: t(`how.items.${key}.title`),
+              body: t(`how.items.${key}.body`),
+            }))}
+          />
         </div>
       </section>
 
       <section className="border-t border-border">
         <div className="container-page flex flex-col gap-8 section-y">
           <SectionHeader
-            eyebrow={t("reports.eyebrow")}
             title={t("reports.title")}
             description={t("reports.description")}
             action={
@@ -166,7 +164,6 @@ export default async function CapitalPage() {
               </ButtonAnchor>
             }
           />
-          <Disclaimer title={t("disclaimer.title")} items={disclaimerItems} />
           <p className="inline-flex items-center gap-1 text-xs text-muted-foreground">
             <ArrowUpRight aria-hidden className="size-3.5" />
             {fund.source ? (
